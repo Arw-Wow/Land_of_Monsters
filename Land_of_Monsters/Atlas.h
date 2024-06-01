@@ -14,9 +14,14 @@ public:
 
 	~Atlas();
 
+	void resetSize(int w, int h);
+
 public:
 
 	std::vector < IMAGE * > frame_list;
+
+	std::string m_path;
+	int m_num;
 
 };
 

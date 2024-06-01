@@ -1,11 +1,11 @@
 #include "Animation.h"
 
+#include "Tool.h"
 
 Animation::Animation(Atlas* atlas, int interval)
 {
 	m_atlas = atlas;
 	m_interval = interval;
-
 }
 
 void Animation::play(Point Position, int delta)
@@ -18,7 +18,18 @@ void Animation::play(Point Position, int delta)
 		timer -= m_interval;
 	}
 
-	putimage(Position.x, Position.y, m_atlas->frame_list[frame_index]);
+	putimage_alpha(Position.x, Position.y, m_atlas->frame_list[frame_index]);
 
+}
+
+void Animation::setAnimation(Atlas* atlas, int interval)
+{
+	m_atlas = atlas;
+	m_interval = interval;
+}
+
+void Animation::reload()
+{
+	frame_index = 0;
 }
 

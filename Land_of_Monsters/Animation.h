@@ -17,6 +17,10 @@ public:
 
 	void play(Point Position, int delta);
 
+	void setAnimation(Atlas* atlas, int interval);
+
+	void reload();
+
 protected:
 
 private:

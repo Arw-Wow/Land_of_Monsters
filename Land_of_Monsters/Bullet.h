@@ -5,10 +5,22 @@
 #include "TouchBox.h"
 
 
+
+enum _BULLET_STATE {
+	BULLET_NORMAL, BULLET_SUPER,
+};
+
+
+
+constexpr int BULLET_NORMAL_SIZE = 30;
+
+constexpr int BULLET_SUPER_SIZE = 50;
+
 // ×Óµ¯Àà
 class Bullet
 {
 public:
+
 	Bullet(Point _pos, Point destination);
 	
 	~Bullet();
@@ -26,6 +38,7 @@ public:
 
 	TouchBox getBox() const { return m_box; }
 
+	static void setState(int state) { bullet_state = state; }
 
 protected:
 
@@ -40,7 +53,11 @@ private:
 	IMAGE m_image;
 	TouchBox m_box;
 
+	int m_size = BULLET_NORMAL_SIZE;
+
 	bool is_invalid = false;
+
+	static int bullet_state;
 
 	// bool is_play_sound = false;
 

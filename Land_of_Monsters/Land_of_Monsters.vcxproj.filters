@@ -48,6 +48,12 @@
     <ClCompile Include="ExitButton.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Enemy_AngryPenguin.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Enemy_EvilFanatic.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h">
@@ -78,6 +84,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ExitButton.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Tool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy_AngryPenguin.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy_EvilFanatic.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

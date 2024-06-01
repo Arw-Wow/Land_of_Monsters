@@ -132,6 +132,8 @@
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="Enemy.cpp" />
+    <ClCompile Include="Enemy_AngryPenguin.cpp" />
+    <ClCompile Include="Enemy_EvilFanatic.cpp" />
     <ClCompile Include="ExitButton.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -145,11 +147,14 @@
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Enemy.h" />
+    <ClInclude Include="Enemy_AngryPenguin.h" />
+    <ClInclude Include="Enemy_EvilFanatic.h" />
     <ClInclude Include="ExitButton.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="StartButton.h" />
     <ClInclude Include="TouchBox.h" />
+    <ClInclude Include="Tool.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

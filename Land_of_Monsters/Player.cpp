@@ -1,8 +1,11 @@
 #include "Player.h"
 
-#include <iostream>
+#include "Tool.h"
 
-Player::Player(Atlas* atlas_player_left, Atlas* atlas_player_right)
+#include <iostream>
+#include "Bullet.h"
+
+Player::Player(Atlas* atlas_player_left, Atlas* atlas_player_right, Atlas* atlas_boom)
 {
 	//初始化point
 	playerPosition.x = PLAYER_INIT_X;
@@ -11,25 +14,24 @@ Player::Player(Atlas* atlas_player_left, Atlas* atlas_player_right)
 	//初始化touchbox
 	playerBox.x = playerPosition.x;
 	playerBox.y = playerPosition.y;
-	playerBox.w = PLAYER_WIDTH;
-	playerBox.h = PLAYER_HEIGHT;
+	playerBox.w = PLAYER_NORMAL_WIDTH;
+	playerBox.h = PLAYER_NORMAL_HEIGHT;
+	playerBox.initSpace();
 
-	Boom_box.x = playerPosition.x - BOOM_SIZE / 2 + PLAYER_WIDTH / 2;
-	Boom_box.y = playerPosition.y - BOOM_SIZE / 2 + PLAYER_HEIGHT / 2;
-	Boom_box.w = BOOM_SIZE;
-	Boom_box.h = BOOM_SIZE;
+	Boom_box.x = playerPosition.x - BOOM_NORMAL_SIZE / 2 + PLAYER_NORMAL_WIDTH / 2;
+	Boom_box.y = playerPosition.y - BOOM_NORMAL_SIZE / 2 + PLAYER_NORMAL_HEIGHT / 2;
+	Boom_box.w = BOOM_NORMAL_SIZE;
+	Boom_box.h = BOOM_NORMAL_SIZE;
+	Boom_box.initSpace();
 
-	//加载玩家站着不动的图片
-	loadimage(&player_stand_image, "res/image/player/stand.png", PLAYER_WIDTH, PLAYER_HEIGHT);
-
-	//加载Boom的图片
-	loadimage(&skill_Boom_image, "res/image/player/Boom.png", BOOM_SIZE, BOOM_SIZE);
+	//加载Boom的动画
+	boom_animation = new Animation(atlas_boom, 130);
 
 	//加载玩家向左移动的动画
-	player_left_animation = new Animation(atlas_player_left, 70);
+	player_left_animation = new Animation(atlas_player_left, m_interval);
 
 	//加载玩家向右移动的动画
-	player_right_animation = new Animation(atlas_player_right, 70);
+	player_right_animation = new Animation(atlas_player_right, m_interval);
 
 }
 
@@ -37,6 +39,8 @@ Player::~Player()
 {
 	delete player_left_animation;
 	delete player_right_animation;
+
+	delete boom_animation;
 }
 
 //获取、处理事件信息
@@ -58,6 +62,14 @@ void Player::Event(ExMessage& msg)
 		case 0x44:	//D
 			is_move_right = true;
 			break;
+		case VK_SPACE:	//Boom键
+			if (Mp >= Boom_cost_Mp && isBoom == false)
+			{
+				Mp -= Boom_cost_Mp;
+				isBoom = true;
+				mciSendString(_T("play boom from 0"), NULL, 0, NULL);
+			}
+			break;
 		}
 	}
 	else if (msg.message == WM_KEYUP) {
@@ -75,13 +87,19 @@ void Player::Event(ExMessage& msg)
 		case 0x44:
 			is_move_right = false;
 			break;
-		case VK_SPACE:	//Boom键
-			isBoom = true;
+		case 0x46:	//F，切换形态（放开F才触发）
+			if (m_state == PLAYER_NORMAL)
+			{
+				m_state = PLAYER_SUPER;
+			}
+			else if (m_state == PLAYER_SUPER)
+			{
+				m_state = PLAYER_NORMAL;
+			}
 			break;
 		}
 	}
 }
-
 
 void Player::Move()
 {
@@ -90,6 +108,7 @@ void Player::Move()
 	int dir_y = is_move_down - is_move_up;
 	double len_dir = sqrt(dir_x * dir_x + dir_y * dir_y);
 	double x_fenliang = 0, y_fenliang = 0;
+
 	if (len_dir != 0)
 	{
 		is_move = true;
@@ -103,36 +122,38 @@ void Player::Move()
 		is_move = false;
 	}
 
-	if (playerPosition.x < 0)							playerPosition.x = 0;
-	if (playerPosition.y < 0)							playerPosition.y = 0;
-	if (playerPosition.x + PLAYER_WIDTH > getwidth())	playerPosition.x = getwidth() - PLAYER_WIDTH;
-	if (playerPosition.y + PLAYER_HEIGHT > getheight())	playerPosition.y = getheight() - PLAYER_HEIGHT;
+	if (playerPosition.x < 0)									playerPosition.x = 0;
+	if (playerPosition.y < 0)									playerPosition.y = 0;
+	if (playerPosition.x + m_width > getwidth())	playerPosition.x = getwidth() - m_width;
+	if (playerPosition.y + m_height > getheight())	playerPosition.y = getheight() - m_height;
 
 	x_change = dir_x;
 	playerBox.x = playerPosition.x;
 	playerBox.y = playerPosition.y;	//更新box位置
 
-	Boom_box.x = playerPosition.x - BOOM_SIZE / 2 + PLAYER_WIDTH / 2;
-	Boom_box.y = playerPosition.y - BOOM_SIZE / 2 + PLAYER_HEIGHT / 2;
+	Boom_box.x = playerPosition.x - boom_size / 2 + m_width / 2;
+	Boom_box.y = playerPosition.y - boom_size / 2 + m_height / 2;
 }
 
-void Player::beAttacked()
+void Player::beAttacked(int damage)
 {
-	//暂时先碰到一次就死
-	MessageBox(GetHWnd(), "你死了！", "游戏结束", MB_OK);
-}
+	// super状态无敌
+	// if (m_state == PLAYER_SUPER)
+	//	return;
 
+	//如果上次受击到这次的间隔小于500ms，就不扣血（无敌500ms）
+	if ((int)(GetTickCount() - last_damage_time) < (int)no_damage_time)
+		return;
+
+	Hp -= damage;
+
+	last_damage_time = GetTickCount();
+}
 
 void Player::Draw(int delta)
 {
 
 	static bool faceing_left = false;
-
-	if (!is_move)
-	{
-		putimage(playerPosition.x, playerPosition.y, &player_stand_image);
-		return;
-	}
 
 	// 如果x_change为0，保持原来的朝向；其他时候改变朝向
 	if (x_change < 0)		faceing_left = true;
@@ -142,12 +163,66 @@ void Player::Draw(int delta)
 		player_left_animation->play(playerPosition, delta);
 	else
 		player_right_animation->play(playerPosition, delta);
+
+
+	if (isBoom)
+	{
+		static int counter = 0;
+		if (counter == 140)
+		{
+			counter = 0;
+			isBoom = false;
+			boom_animation->reload();
+			return;
+		}
+		boom_animation->play(Boom_box.getPosition(), delta);
+
+		counter++;
+	}
 }
 
-void Player::releaseBoom()
+void Player::InitNewState(Atlas* atlas_player_left, Atlas* atlas_player_right, Atlas* atlas_boom)
 {
-	putimage(Boom_box.x, Boom_box.y, &skill_Boom_image);
-	std::cout << "Boom" << std::endl;
+	if (m_state == PLAYER_NORMAL)
+	{
+		m_width = PLAYER_NORMAL_WIDTH;
+		m_height = PLAYER_NORMAL_HEIGHT;
+		damage = 1;
+		boom_size = BOOM_NORMAL_SIZE;
+		Boom_damage = BOOM_NORMAL_DAMAGE;
+		Boom_cost_Mp = BOOM_NORMAL_COST;
+		Bullet::setState(BULLET_NORMAL);
+	}
+	else if (m_state == PLAYER_SUPER)
+	{
+		m_width = PLAYER_SUPER_WIDTH;
+		m_height = PLAYER_SUPER_HEIGHT;
+		damage = 2;
+		boom_size = BOOM_SUPER_SIZE;
+		Boom_damage = BOOM_SUPER_DAMAGE;
+		Boom_cost_Mp = BOOM_SUPER_COST;
+		Bullet::setState(BULLET_SUPER);
+	}
+
+	playerBox.w = m_width;
+	playerBox.h = m_height;
+	playerBox.initSpace();
+
+	Boom_box.x = playerPosition.x - boom_size / 2 + m_width / 2;
+	Boom_box.y = playerPosition.y - boom_size / 2 + m_height / 2;
+	Boom_box.w = boom_size;
+	Boom_box.h = boom_size;
+	Boom_box.initSpace();
+
+	//加载Boom的动画
+	boom_animation->setAnimation(atlas_boom, 130);
+
+	//加载玩家向左移动的动画
+	player_left_animation->setAnimation(atlas_player_left, m_interval);
+
+	//加载玩家向右移动的动画
+	player_right_animation->setAnimation(atlas_player_right, m_interval);
+
 }
 
 Point Player::getPosition() const
@@ -165,4 +240,12 @@ TouchBox Player::getBoomBox() const
 	return Boom_box;
 }
 
+
+
+// void Player::releaseBoom(int delta)
+// {
+
+//	// putimage_alpha(Boom_box.x, Boom_box.y, &skill_Boom_image);
+//	// std::cout << "Boom" << std::endl;
+// }
 

@@ -5,12 +5,13 @@
 
 
 enum _STATE {
-	STATE_1, STATE_2, STATE_3, 
+	STATE_1, STATE_2, STATE_3,
 };
 
 
 class Button
 {
+
 public:
 	Button(TouchBox box, LPCTSTR path);
 	~Button() = default;
