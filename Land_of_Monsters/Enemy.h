@@ -39,7 +39,7 @@ public:
 
 	void Move(const Player* player);
 
-	void Draw(int delta);
+	virtual void Draw(int delta);
 
 	bool isAlive() const { return Hp > 0; }
 

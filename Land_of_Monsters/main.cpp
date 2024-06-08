@@ -13,6 +13,8 @@ super state: damage = 2, Boom damage = 5, Boom cost Mp = 2;
 初始1500ms生成一个敌人
 每300分，生成间隔时间缩小为原来的0.8倍
 
+敌人和玩家被攻击后都有0.5秒左右的无敌帧，敌人无敌帧时子弹会穿过去，不是bug
+
 */
 
 
@@ -108,21 +110,26 @@ inline void OutputScoreText() {
 	outtextxy(1100, 30, outtext);
 }
 
-inline void OutputHpAndMpText()
+inline void OutputHpAndMpText() 
 {
-	char outtext[256] = { 0 };
+	int hp_grid_length = 35;
+	int mp_grid_length = 35;
+
 	setbkmode(TRANSPARENT);	//设置字体背景为透明
 
-	sprintf_s(outtext, sizeof(outtext), "Hp：%d", player->getHp());
 	settextcolor(RED);
 	settextstyle(30, 0, "微软雅黑");
-	outtextxy(10, 30, outtext);
+	outtextxy(10, 30, "Hp:");
 
-	sprintf_s(outtext, sizeof(outtext), "Mp：%d", player->getMp());
+	setfillcolor(RED);
+	fillrectangle(50, 35, 50 + player->getHp() * hp_grid_length, 55);
+
 	settextcolor(BLUE);
 	settextstyle(30, 0, "微软雅黑");
-	outtextxy(10, 70, outtext);
+	outtextxy(10, 70, "Mp:");
 
+	setfillcolor(BLUE);
+	fillrectangle(50, 75, 50 + player->getMp() * mp_grid_length, 95);
 }
 
 inline void OutputLevelText()
@@ -227,8 +234,9 @@ void TryAddPlayerMp()
 {
 	static int timer = 1;
 
+	int max_Mp = 20;
 	//一段时间加一点Mp
-	if (timer * FPS % ADD_MP_INTERVAL == 0)
+	if (timer * FPS % ADD_MP_INTERVAL == 0 && player->getMp() < max_Mp)
 	{
 		player->setMp(player->getMp() + 1);
 		timer = 0;
@@ -286,6 +294,7 @@ int main() {
 	mciSendString(_T("open res/music/enemy_death.mp3 alias enemy_death"), NULL, 0, NULL);
 	mciSendString(_T("open res/music/boom.mp3 alias boom"), NULL, 0, NULL);
 	mciSendString(_T("open res/music/player_change_state.mp3 alias player_change_state"), NULL, 0, NULL);
+	mciSendString(_T("open res/music/hurt.mp3 alias hurt"), NULL, 0, NULL);
 
 
 	//创建敌人池和子弹池

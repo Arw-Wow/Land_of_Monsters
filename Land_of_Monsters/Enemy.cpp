@@ -124,6 +124,16 @@ void Enemy::Draw(int delta)
 	else
 		enemy_right_animation->play(enemyPosition, delta);
 
+	int hp_grid_length = 20;
+
+	int hp_width = hp_grid_length * Hp;
+	int hp_height = m_height / 8;
+
+	int offset_x = (m_width - hp_width) / 2;
+
+	setfillcolor(RED);
+	fillrectangle(enemyPosition.x + offset_x, enemyPosition.y + hp_height, enemyPosition.x + offset_x + hp_width, enemyPosition.y);
+
 }
 
 bool Enemy::beAttacked(int damage)

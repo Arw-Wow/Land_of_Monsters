@@ -147,6 +147,8 @@ void Player::beAttacked(int damage)
 
 	Hp -= damage;
 
+	mciSendString("play hurt from 0", NULL, 0, NULL);
+
 	last_damage_time = GetTickCount();
 }
 
