@@ -2,6 +2,18 @@
 
 
 
+### version 2.5
+
+1.将Hp和Mp替换为了长条状而非之前的文本形式。敌人的血条也显示出来了
+
+2.增加了player受击音效
+
+3.增加了Mp上限值
+
+![屏幕截图 2024-06-08 235442](https://github.com/Arw-Wow/Land_of_Monsters/assets/149250925/78236f99-9fdc-4551-b6a2-baa2524f046c)
+
+
+
 ### version 2.0
 
 1.替换了贴图，消除了贴图边框
